@@ -1,0 +1,1395 @@
+#LyX 1.6.1 created this file. For more info see http://www.lyx.org/
+\lyxformat 345
+\begin_document
+\begin_header
+\textclass article
+\use_default_options false
+\language ngerman
+\inputencoding latin9
+\font_roman default
+\font_sans default
+\font_typewriter default
+\font_default_family default
+\font_sc false
+\font_osf false
+\font_sf_scale 100
+\font_tt_scale 100
+
+\graphics default
+\paperfontsize default
+\spacing single
+\use_hyperref false
+\papersize a4paper
+\use_geometry true
+\use_amsmath 1
+\use_esint 0
+\cite_engine basic
+\use_bibtopic false
+\paperorientation portrait
+\leftmargin 3cm
+\topmargin 3cm
+\rightmargin 3cm
+\bottommargin 4cm
+\headheight 1cm
+\headsep 2cm
+\footskip 2cm
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation skip
+\defskip medskip
+\quotes_language danish
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+\bullet 0 0 8 1
+\bullet 1 0 34 1
+\tracking_changes false
+\output_changes false
+\author "" 
+\author "" 
+\end_header
+
+\begin_body
+
+\begin_layout Title
+
+\shape smallcaps
+\size huge
+Der Shor Algorithmus
+\shape default
+
+\begin_inset Newline newline
+\end_inset
+
+
+\size footnotesize
+Faktorisierungsverfahren in polynomialer Laufzeit mithilfe eines Quantencomputer
+s
+\end_layout
+
+\begin_layout Author
+Lukas Lentner
+\end_layout
+
+\begin_layout Date
+24.
+ November 2009
+\end_layout
+
+\begin_layout Standard
+\begin_inset VSpace vfill
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset CommandInset toc
+LatexCommand tableofcontents
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+Einführung
+\end_layout
+
+\begin_layout Standard
+Das Faktorisieren von ganze Zahlen ist eine Aufgabenstellung aus der Zahlentheor
+ie und besitzt eine langen Geschichte.
+\end_layout
+
+\begin_layout Standard
+Neben Euklid haben sich schon viele berühmte Mathematiker wie Fermat mit
+ der Suche nach einem effizienteren Verfahren als der Probedivision beschäftigt.
+ Seit den 80er Jahren ist das Quadratische Sieb von Carl Pomerance (1981)
+ einer der besten Algorithmen (exponentielle Laufzeit).
+\end_layout
+
+\begin_layout Standard
+Da die Primfaktorzerlegung bei großen Zahlen immer noch sehr langsam ist,
+ basieren viele Systeme auf diesem Problem.
+\end_layout
+
+\begin_layout Standard
+Beispiel: Das Public-Key Kryptosystem RSA, welches zur Internetverschlüsselung
+ eingesetzt wird, vertraut auf die Schwierigkeit ein Produkt zweier großen
+ Primzahlen zu faktorisieren.
+\end_layout
+
+\begin_layout Standard
+Der Shor Algorithmus stellt ein neues, schnelleres Verfahren da, welches
+ auf der Quanteninformationsverarbeitung aufbaut.
+\end_layout
+
+\begin_layout Standard
+Er wurde 1994 von Peter Shor in seiner Arbeit 
+\begin_inset Quotes ald
+\end_inset
+
+Polynomial-Time Algorithms for Prime Factorization and Discrete Logarithms
+ on a Quantum Computer
+\begin_inset Quotes ard
+\end_inset
+
+ veröffentlicht und ist bislang das einzige Faktorisierungsverfahren mit
+ einer polynominalen Laufzeit.
+ Allerdings ist die Nutzung noch stark von der verfügbaren Hardware abhängig
+ (2001 faktorisierte eine Forschungsgruppe von IBM die Zahl 15.
+ Hierfür benötigt man einen Quantencomputer mit 7 Qubits).
+\end_layout
+
+\begin_layout Section
+Vorangehende Erläuterungen
+\end_layout
+
+\begin_layout Subsection
+Diskrete Quanten-Fouriertransformation
+\end_layout
+
+\begin_layout Standard
+Allgemein ordnet die diskrete Fouriertransformation einem Vektor 
+\begin_inset Formula $x_{j}$
+\end_inset
+
+ mit 
+\begin_inset Formula $0\leq j\leq N-1$
+\end_inset
+
+ einen Vektor 
+\begin_inset Formula $y_{k}$
+\end_inset
+
+ so zu, dass
+\end_layout
+
+\begin_layout Standard
+\noindent
+\align center
+\begin_inset Formula ${\displaystyle {\displaystyle y_{k}=\frac{1}{\sqrt{N}}{\displaystyle \sum_{j=0}^{N-1}x_{j}}}e^{2\pi ijk/N}}$
+\end_inset
+
+ .
+\end_layout
+
+\begin_layout Standard
+Die Quanten-Fouriertransformation auf einer orthonormale Basis 
+\begin_inset Formula $|0\rangle,\ldots,|N-1\rangle$
+\end_inset
+
+ wird also folgendermaßen als linearer Operator definiert:
+\end_layout
+
+\begin_layout Standard
+\noindent
+\align center
+\begin_inset Formula ${\displaystyle |j\rangle\longmapsto\frac{1}{\sqrt{N}}{\displaystyle \sum_{k=0}^{N-1}}e^{2\pi ijk/N}|k\rangle}$
+\end_inset
+
+ .
+\end_layout
+
+\begin_layout Standard
+Verwendet man die reinen Zustände eines 
+\begin_inset Formula $n$
+\end_inset
+
+-QBit-Systems als Basis, so ist 
+\begin_inset Formula $N=2^{n}$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+Weiterhin macht es Sinn Ganzzahlen und Brüche binär darzustellen: 
+\begin_inset Formula $j=j_{1}2^{n-1}+\ldots+j_{n}2^{0}=j_{1}\ldots j_{n}$
+\end_inset
+
+ und 
+\begin_inset Formula $0.j_{1}\ldots j_{n}=j_{1}2^{-1}+\ldots+j_{n}2^{-n}$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsubsection
+Produktdarstellung
+\end_layout
+
+\begin_layout Standard
+Wir formen um:
+\end_layout
+
+\begin_layout Standard
+\noindent
+\begin_inset Formula \begin{eqnarray*}
+|j\rangle & \longmapsto & {\displaystyle \frac{1}{\sqrt{2^{n}}}{\displaystyle \sum_{k=0}^{2^{n}-1}}e^{2\pi ijk/2^{n}}|k\rangle}\\
+ & = & \frac{1}{\sqrt{2^{n}}}{\displaystyle \sum_{k_{1}=0}^{1}\ldots\sum_{k_{n}=0}^{1}}e^{2\pi ij\sum_{l=1}^{n}k_{l}2^{-l}}|k_{1}\ldots k_{n}\rangle\\
+ & = & {\displaystyle \frac{1}{\sqrt{2^{n}}}{\displaystyle \sum_{k_{1}=0}^{1}\ldots\sum_{k_{n}=0}^{1}}}{\displaystyle {\displaystyle \bigotimes\limits _{l=1}^{n}e^{2\pi ijk_{l}2^{-l}}}|k_{l}\rangle}\\
+ & = & {\displaystyle \frac{1}{\sqrt{2^{n}}}}{\displaystyle \bigotimes\limits _{l=1}^{n}\sum_{k_{l}=0}^{1}e^{2\pi ijk_{l}2^{-l}}|k_{l}\rangle}\\
+ & = & {\displaystyle \frac{1}{\sqrt{2^{n}}}}{\displaystyle \bigotimes\limits _{l=1}^{n}(|0\rangle+e^{2\pi ij2^{-l}}|1\rangle)}\\
+ & = & {\displaystyle {\displaystyle \frac{(|0\rangle+e^{2\pi i0.j_{n}}|1\rangle)(|0\rangle+e^{2\pi i0.j_{n-1}j_{n}}|1\rangle)\ldots(|0\rangle+e^{2\pi i0.j_{1}\ldots j_{n}}|1\rangle)}{\sqrt{2^{n}}}}}\end{eqnarray*}
+
+\end_inset
+
+ Dieser Zustand lässt sich - wie folgend gezeigt - relativ leicht präparieren.
+\end_layout
+
+\begin_layout Subsubsection
+Algorithmus
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+placement H
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\noindent
+\align center
+\begin_inset Graphics
+	filename qft.png
+	lyxscale 50
+	width 80text%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption
+
+\begin_layout Plain Layout
+4-QBit Quanten-Fouriertransformation
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Wir beginnen mit dem höchsten QBit 
+\begin_inset Formula $|j_{1}\rangle$
+\end_inset
+
+ und wenden darauf ein Hadamard-Gatter an.
+ Darauf folgt eine Serie von kontrollierten Phasen- bzw.
+ 
+\begin_inset Formula $R$
+\end_inset
+
+-Gattern, wobei
+\end_layout
+
+\begin_layout Standard
+\noindent
+\align center
+\begin_inset Formula $R_{k}=\left(\begin{array}{cc}
+1 & 0\\
+0 & e^{2\pi i/2^{k}}\end{array}\right)$
+\end_inset
+
+ .
+\end_layout
+
+\begin_layout Standard
+Die Serie beginnt mit 
+\begin_inset Formula $k=2$
+\end_inset
+
+ und wird sukzessive von dem nächst tieferen QBit kontrolliert.
+ Dieses Verfahren wird jeweils auf das nächst-niedriger QBit angewandt (Bsp.
+ 2.-höchstes QBit: 
+\begin_inset Formula $|\widetilde{j_{2}}\rangle=R_{n-1}\ldots R_{2}H|j_{2}\rangle$
+\end_inset
+
+, wobei 
+\begin_inset Formula $R_{2}$
+\end_inset
+
+ von 
+\begin_inset Formula $|j_{3}\rangle$
+\end_inset
+
+ und 
+\begin_inset Formula $R_{n-1}$
+\end_inset
+
+ von 
+\begin_inset Formula $|j_{n}\rangle$
+\end_inset
+
+ kontrolliert wird).
+\end_layout
+
+\begin_layout Standard
+Zum Schluss werden alle QBits achsensymetrisch vertauscht (SWAP).
+ Die gewünschte Produktdarstellung ist erreicht.
+\end_layout
+
+\begin_layout Subsubsection
+Beispiel 
+\begin_inset Formula $|j_{2}\rangle$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Wir wollen den Algorithmus für das 2.-höchste QBit ausführen, um zu zeigen,
+ dass wir auf die gewünschte Produktdarstellung kommen.
+ 
+\end_layout
+
+\begin_layout Itemize
+Das Hadamard-Gatter:
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+\begin_inset Formula ${\displaystyle \frac{1}{\sqrt{2}}(|0\rangle+e^{2\pi i0.j_{2}}|1\rangle)}$
+\end_inset
+
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Das 
+\begin_inset Formula $R_{2}$
+\end_inset
+
+-Gatter:
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+\begin_inset Formula ${\displaystyle \frac{1}{\sqrt{2}}(|0\rangle+e^{2\pi i(0.j_{2}+j_{3}/2^{2})}|1\rangle)=\frac{1}{\sqrt{2}}(|0\rangle+e^{2\pi i0.j_{2}j_{3}}|1\rangle)}$
+\end_inset
+
+ 
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Die Anwendung der weiteren 
+\begin_inset Formula $R$
+\end_inset
+
+-Gatter:
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+\begin_inset Formula ${\displaystyle \frac{1}{\sqrt{2}}(|0\rangle+e^{2\pi i0.j_{2}\ldots j_{n}}|1\rangle)}$
+\end_inset
+
+ 
+\end_layout
+
+\end_deeper
+\begin_layout Subsubsection
+Laufzeit und Resourcen
+\end_layout
+
+\begin_layout Standard
+Da auf jedes QBit 
+\begin_inset Formula $|j_{k}\rangle$
+\end_inset
+
+ 
+\begin_inset Formula $n-k+1$
+\end_inset
+
+ Gatter angewandt werden und die Vertauschung gegen Ende (SWAP) aus maximal
+ 
+\begin_inset Formula $n/2$
+\end_inset
+
+ Elementarvertauschungen (3 kontrollierte NOT-Gatter) besteht, benötigt
+ man insgesamt 
+\begin_inset Formula $\frac{n(n+1)+3n}{2}$
+\end_inset
+
+ Gatter.
+ Also ist die Ordnung des Algorithmus 
+\begin_inset Formula $\Theta(n^{2})$
+\end_inset
+
+ und somit exponentiell schneller als die besten klassischen Algorithmen
+ (FFT - Fast Fourier Transformation: 
+\begin_inset Formula $\Theta(n2^{n})$
+\end_inset
+
+).
+\end_layout
+
+\begin_layout Subsection
+Quanten-Phasen-Approximation
+\end_layout
+
+\begin_layout Standard
+Häufig ist es nötig die Eigenwerte von unitären Operatoren zu bestimmen,
+ welche sich als 
+\begin_inset Formula $U|u\rangle=e^{2\pi i\varphi}|u\rangle$
+\end_inset
+
+ schreiben lassen; sie sind also durch Ihre Phase bereits vollständig identifizi
+ert.
+ Das Nähern dieser Phase soll hier weiterhin beschrieben werden, wobei es
+ zu beachten gilt, dass es sich hierbei mehr um ein Konzept handelt, als
+ um einen Algorithmus, da die Machbarkeit und Laufzeit stark von 
+\begin_inset Formula $U$
+\end_inset
+
+ abhängt.
+\end_layout
+
+\begin_layout Subsubsection
+Verfahren
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+placement H
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\noindent
+\align center
+\begin_inset Graphics
+	filename phase.pdf
+	lyxscale 50
+	width 80text%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption
+
+\begin_layout Plain Layout
+4-QBit Phasen-Approximation
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Das Verfahren verwendet 2 Quantenregister.
+ Das erste wird mit 
+\begin_inset Formula $|0\rangle^{\otimes t}$
+\end_inset
+
+ initialisiert, wobei 
+\begin_inset Formula $t$
+\end_inset
+
+ sowohl von der Genauigkeit der Näherung, als auch von gewünschten Erfolgswahrsc
+heinlichkeit abhängt.
+ Das zweite wird mit 
+\begin_inset Formula $|u\rangle$
+\end_inset
+
+ initialisiert und behält diesen Wert.
+ Nun werden folgende Schritte ausgeführt:
+\end_layout
+
+\begin_layout Itemize
+Auf das erste Quantenregister wird ein Hadamard-Gatter angewandt:
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+\begin_inset Formula ${\displaystyle \frac{1}{\sqrt{2^{t}}}(|0\rangle+|1\rangle)^{\otimes t}|u\rangle}$
+\end_inset
+
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Auf das zweite Quantenregister werden sukzessive 
+\begin_inset Formula $U^{2^{k}}$
+\end_inset
+
+-Gatter angewandt, welche vom 
+\begin_inset Formula $k$
+\end_inset
+
+-ten QBit des ersten Quantenregisters kontrolliert werden (beginnend mit
+ dem niedrigsten QBit).
+ Die Änderung der relativen Phase kann man im Tensorprodukt auch dem 1.
+ Quantenregister zuordnen:
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+\begin_inset Formula ${\displaystyle \frac{1}{\sqrt{2^{t}}}(|0\rangle+e^{2\pi i2^{t-1}\varphi}|1\rangle)\ldots(|0\rangle+e^{2\pi i2^{0}\varphi}|1\rangle)|u\rangle=\frac{1}{\sqrt{2^{t}}}\sum_{k=0}^{2^{t}-1}e^{2\pi i\varphi k}|k\rangle|u\rangle}$
+\end_inset
+
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Auf das erste Quantenregister wird die inverse Fouriertransformation angewandt:
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+\begin_inset Formula ${\displaystyle |\widetilde{\varphi}\rangle|u\rangle}$
+\end_inset
+
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Das erste Quantenregister wird gemessen:
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+\begin_inset Formula ${\displaystyle \widetilde{\varphi}}$
+\end_inset
+
+
+\end_layout
+
+\end_deeper
+\begin_layout Subsubsection
+Genauigkeit bzw.
+ Erfolg
+\end_layout
+
+\begin_layout Standard
+Falls 
+\begin_inset Formula $\varphi=\frac{b}{2^{t}}$
+\end_inset
+
+ messen wir 
+\begin_inset Formula $\varphi$
+\end_inset
+
+ genau (
+\begin_inset Formula $\varphi=\widetilde{\varphi}$
+\end_inset
+
+).
+ Ansonsten liefert 
+\begin_inset Formula $\widetilde{\varphi}$
+\end_inset
+
+ eine gute Näherung von 
+\begin_inset Formula $\varphi$
+\end_inset
+
+.
+ Soll unser Messergebnis eine 
+\begin_inset Formula $n$
+\end_inset
+
+-bit Näherung der Phase sein, so wissen wir aus 
+\begin_inset CommandInset citation
+LatexCommand cite
+after "S. 224"
+key "nielsen"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\noindent
+\align center
+\begin_inset Formula ${\displaystyle \epsilon\leq\frac{1}{2(2^{t-n}-2)}}$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+und folgern
+\end_layout
+
+\begin_layout Standard
+\noindent
+\align center
+\begin_inset Formula ${\displaystyle t=n+\left\lceil \mathrm{lb(}\frac{1}{2\epsilon}+2)\right\rceil }$
+\end_inset
+
+ .
+\end_layout
+
+\begin_layout Subsubsection
+Laufzeit und Resourcen
+\end_layout
+
+\begin_layout Standard
+Grundsätzlich werden für die Approximation der Phase 
+\begin_inset Formula ${\textstyle t}$
+\end_inset
+
+ Hadamard-Gatter, die 
+\begin_inset Formula ${\textstyle U^{2^{k}}}$
+\end_inset
+
+-Gatter und ein Schaltkreis der inversen Fouriertransformation (
+\begin_inset Formula ${\textstyle \Theta(t^{2})}$
+\end_inset
+
+) benötigt.
+ Da der Operator nicht näher spezifiziert wird, sagen wir die Laufzeit beträgt
+ 
+\begin_inset Formula ${\textstyle \Theta(t^{2})}$
+\end_inset
+
+ ausschließlich der Anwendung der 
+\begin_inset Formula ${\textstyle U^{2^{k}}}$
+\end_inset
+
+-Gatter.
+ Außerdem sollte der Aufwand einen Eigenzustand 
+\begin_inset Formula $|u\rangle$
+\end_inset
+
+ herzustellen beachtet werden!
+\end_layout
+
+\begin_layout Subsection
+Quantenmechanische Berechung der Ordnung
+\end_layout
+
+\begin_layout Standard
+Für die Ganzzahlen 
+\begin_inset Formula $x$
+\end_inset
+
+ und 
+\begin_inset Formula $N$
+\end_inset
+
+ mit 
+\begin_inset Formula $0<x,N$
+\end_inset
+
+ und 
+\begin_inset Formula $x\bot N$
+\end_inset
+
+ kann man die kleinste, positive Ganzzahl 
+\begin_inset Formula $r$
+\end_inset
+
+ berechnen, sodass
+\end_layout
+
+\begin_layout Standard
+\noindent
+\align center
+\begin_inset Formula ${\displaystyle x^{r}\equiv1\:(\mathrm{mod}\: N)}$
+\end_inset
+
+ ,
+\end_layout
+
+\begin_layout Standard
+wobei 
+\begin_inset Quotes ald
+\end_inset
+
+
+\begin_inset Formula $\mathrm{mod}\; N$
+\end_inset
+
+
+\begin_inset Quotes ard
+\end_inset
+
+ angibt, dass wir uns in einer Restklassengruppe (
+\begin_inset Formula $\mathbb{Z}_{N}^{\star}$
+\end_inset
+
+) befinden.
+ D.
+ h.
+ 
+\begin_inset Formula ${\displaystyle {\textstyle 1\equiv N+1\:(\mathrm{mod}\: N)}}$
+\end_inset
+
+.
+ 
+\begin_inset Formula $r$
+\end_inset
+
+ nennen wir Ordnung.
+\end_layout
+
+\begin_layout Subsubsection
+Algorithmus
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+placement H
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\noindent
+\align center
+\begin_inset Graphics
+	filename order.png
+	lyxscale 50
+	width 80text%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption
+
+\begin_layout Plain Layout
+4-QBit Berechnung der Ordnung
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Um die Ordnung von 
+\begin_inset Formula $x$
+\end_inset
+
+ und 
+\begin_inset Formula $N$
+\end_inset
+
+ zu berechnen, führt man eine Phasen-Approximation des unitären Operators
+ 
+\begin_inset Formula $U|y\rangle=|xy\:(\mathrm{mod\: N)\rangle}$
+\end_inset
+
+ aus, wobei 
+\begin_inset Formula $y\in\{0,1\}^{L}$
+\end_inset
+
+ mit 
+\begin_inset Formula $L=\left\lceil \mathrm{lb(N)}\right\rceil $
+\end_inset
+
+.
+ Man sieht leicht, dass
+\end_layout
+
+\begin_layout Standard
+\noindent
+\align center
+\begin_inset Formula ${\displaystyle |u_{s}\rangle=\frac{1}{\sqrt{r}}\sum_{k=0}^{r-1}e^{-2\pi isk/r}|x^{k}\:(\mathrm{mod}\: N\rangle}$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+mit 
+\begin_inset Formula $0\leqq s\leqq r-1$
+\end_inset
+
+ die Eigenzustände von 
+\begin_inset Formula $U$
+\end_inset
+
+ mit den dazugehörigen Eigenwerten 
+\begin_inset Formula $\lambda_{s}=e^{2\pi is/r}$
+\end_inset
+
+ sind.
+\end_layout
+
+\begin_layout Standard
+Um die Phase nähern zu können, werden die Operatoren 
+\begin_inset Formula $U^{2^{m}}$
+\end_inset
+
+ in einer schnellen Implementierung benötigt.
+ Hierfür verwenden wir die Tatsache, dass die Anwendung der 
+\begin_inset Formula $U^{2^{m}}$
+\end_inset
+
+-Operatoren wie folgt umgeformt werden kann 
+\begin_inset Formula $|j\rangle U^{j_{t}2^{t-1}}\ldots U^{j_{1}2^{0}}|y\rangle=|j\rangle|x^{j_{t}2^{t-1}}\ldots x^{j_{1}2^{0}}y\:(\mathrm{mod}\: N)\rangle=|j\rangle|x^{j}y\:(\mathrm{mod}\: N)\rangle$
+\end_inset
+
+ und benutzen den schnellen, klassischen Algorithmus, um Zahlen module zu
+ exponentieren.
+ Weiterhin benötigen wir einen Eigenzustand 
+\begin_inset Formula $|u_{s}\rangle$
+\end_inset
+
+, was allerdings die Kenntnis von 
+\begin_inset Formula $r$
+\end_inset
+
+ erfordert und deshalb nicht möglich ist.
+ Folgendes hier nicht bewiesene Theorem aus 
+\begin_inset CommandInset citation
+LatexCommand cite
+after "S. 227"
+key "nielsen"
+
+\end_inset
+
+ erlaubt es uns trotzdem die Phasen-Approximation auszuführen:
+\end_layout
+
+\begin_layout Standard
+\noindent
+\align center
+\begin_inset Formula ${\displaystyle \frac{1}{\sqrt{r}}\sum_{s=0}^{r-1}|u_{s}\rangle=|1\rangle}$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Benutzen wir 
+\begin_inset Formula $|1\rangle$
+\end_inset
+
+ als Eingabe für das 2.
+ Quantenregister, werden wir später 
+\begin_inset Formula $\varphi\approx s/r$
+\end_inset
+
+ für einen Eigenzustand 
+\begin_inset Formula $s$
+\end_inset
+
+ erhalten.
+ Obwohl wir 
+\begin_inset Formula $s$
+\end_inset
+
+ nicht kennen, können wir mit der Kettenbruchentwicklung schnell ein Paar
+ 
+\begin_inset Formula $s'$
+\end_inset
+
+ und 
+\begin_inset Formula $r'$
+\end_inset
+
+ erhalten, welches 
+\begin_inset Formula $\varphi$
+\end_inset
+
+ gut nähert (hierfür muss das 
+\begin_inset Formula $n$
+\end_inset
+
+ der Phasen-Approximation 
+\begin_inset Formula $2L+1$
+\end_inset
+
+ Qbits betragen 
+\begin_inset CommandInset citation
+LatexCommand cite
+after "S. 229"
+key "nielsen"
+
+\end_inset
+
+).
+\end_layout
+
+\begin_layout Standard
+Sodann testen wir 
+\begin_inset Formula $r'$
+\end_inset
+
+, ob wirklich 
+\begin_inset Formula ${\displaystyle {\textstyle x^{r'}\equiv1\:(\mathrm{mod}\: N)}}$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Subsubsection
+Genauigkeit bzw.
+ Erfolg
+\end_layout
+
+\begin_layout Standard
+Natürlich hängt die Genauigkeit bzw.
+ der Erfolg der Ordnungssuche von der Genauigkeit der Phasen-Approximation
+ ab.
+ Wir haben aber gesehen, dass diese durch hinzufügen von QBits effizient
+ erhöht werden kann.
+\end_layout
+
+\begin_layout Standard
+Das zweite - weitaus schwerwiegendere - Problem tritt auf, falls 
+\begin_inset Formula $r$
+\end_inset
+
+ und 
+\begin_inset Formula $s$
+\end_inset
+
+ gemeinsame Faktoren haben.
+ Dann ist 
+\begin_inset Formula $r'$
+\end_inset
+
+ nämlich nur ein Faktor von 
+\begin_inset Formula $r$
+\end_inset
+
+.
+ Mehrere Abschätzungen z.B.
+ für die Verteilung von Primzahlen für 
+\begin_inset Formula $s$
+\end_inset
+
+ geben hier an, wie wahrscheinlich es ist, dass die Zahl 
+\begin_inset Formula $r'$
+\end_inset
+
+ die Ordnung ist.
+ Eine gute Abschätzung benötigt lediglich eine konstante Erhöhung der Ausführung
+sanzahl 
+\begin_inset CommandInset citation
+LatexCommand cite
+after "S. 231"
+key "nielsen"
+
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Subsubsection
+Laufzeit und Resourcen
+\end_layout
+
+\begin_layout Standard
+Es werden 
+\begin_inset Formula $\Theta(L)$
+\end_inset
+
+ Hadamard-Gatter und eine inverse Fouriertransformation mit 
+\begin_inset Formula $\Theta(L^{2})$
+\end_inset
+
+ benötigt.
+ Außerdem schlägt die modulare Exponentierung und die Kettenbruchentwicklung
+ mit je 
+\begin_inset Formula $\Theta(L^{3})$
+\end_inset
+
+ zu Buche.
+ Die Ausführungshäufigkeit muss konstant erhöht werden, um die Genauigkeit
+ zu steigern.
+ So benötigt der Algorithmus insgesamt 
+\begin_inset Formula $\Theta(L^{3})$
+\end_inset
+
+ Gatter.
+\end_layout
+
+\begin_layout Section
+Der Shor-Algorithmus
+\end_layout
+
+\begin_layout Standard
+Nun haben wir das quantenmechanische Rüstzeug, um den auf Zahlentheorie
+ basierenden Faktorisierungsalgorithmus zu verstehen.
+\end_layout
+
+\begin_layout Subsection
+Algorithmus
+\end_layout
+
+\begin_layout Standard
+Die folgenden Anweisungen werden solange wiederholt, bis ein Teiler gefunden
+ wurde.
+ Die Wahrscheinlichkeit hierfür steigt exponentiell mit der Anzahl der Wiederhol
+ungen.
+\end_layout
+
+\begin_layout Standard
+Man möchte einen nicht-trivialen Teiler von 
+\begin_inset Formula $N\in\mathbb{N}$
+\end_inset
+
+ finden.
+ 
+\end_layout
+
+\begin_layout Enumerate
+Wähle zufällig 
+\begin_inset Formula $x\in\mathbb{N}$
+\end_inset
+
+ mit 
+\begin_inset Formula $1<x<N$
+\end_inset
+
+.
+ 
+\end_layout
+
+\begin_layout Enumerate
+Berechne 
+\begin_inset Formula $\gcd(x,N)$
+\end_inset
+
+.
+ Falls dies 
+\begin_inset Formula $\neq1$
+\end_inset
+
+, gib den Teiler als Lösung zurück und beende den Algorithmus.
+ 
+\end_layout
+
+\begin_layout Enumerate
+Bestimme die Ordnung 
+\begin_inset Formula $r$
+\end_inset
+
+ von 
+\begin_inset Formula $x$
+\end_inset
+
+ in der primen Restklassengruppe 
+\begin_inset Formula $\mathbb{Z}_{n}^{\star}$
+\end_inset
+
+, also die kleinste Lösung von 
+\begin_inset Formula $x^{r}\equiv1\:(\mathrm{mod}\: N)$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Enumerate
+Sollte 
+\begin_inset Formula $r$
+\end_inset
+
+ ungerade oder 
+\begin_inset Formula $x^{r/2}\equiv-1\:(\mathrm{mod}\: N)$
+\end_inset
+
+, so ist 
+\begin_inset Formula $x$
+\end_inset
+
+ ungeeignet.
+ Wiederhole den Algorithmus.
+ 
+\end_layout
+
+\begin_layout Enumerate
+Die Lösung ergibt sich nun als 
+\begin_inset Formula $\gcd(x^{r/2}\pm1,N)$
+\end_inset
+
+.
+ 
+\end_layout
+
+\begin_layout Subsection
+Beweis
+\end_layout
+
+\begin_layout Standard
+Da eine Ordnung nur existiert, falls 
+\begin_inset Formula $x$
+\end_inset
+
+ und 
+\begin_inset Formula $n$
+\end_inset
+
+ teilerfremd ist, wird dies zu Anfangs überprüft.
+\end_layout
+
+\begin_layout Standard
+Ansonsten betrachten wir 
+\begin_inset Formula $\underset{a}{\underbrace{(x^{r/2}+1)}}\,\underset{b}{\underbrace{(x^{r/2}-1)}}=x^{r}-1$
+\end_inset
+
+ und stellen fest:
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Formula $x^{r}-1\equiv0\:(\mathrm{mod}\: N)$
+\end_inset
+
+, wegen der Definition von 
+\begin_inset Formula $r$
+\end_inset
+
+.
+ Deshalb können wir dafür auch 
+\begin_inset Formula $N\mathbb{Z}$
+\end_inset
+
+ schreiben 
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Formula $a\not\equiv0\:(\mathrm{mod}\: N)$
+\end_inset
+
+, was aus Schritt 4 folgt.
+ 
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Formula $b\not\equiv0\:(\mathrm{mod}\: N)$
+\end_inset
+
+, da 
+\begin_inset Formula $r$
+\end_inset
+
+ in Schritt 3 die kleinste Lösung war und natürlich 
+\begin_inset Formula $r/2<r$
+\end_inset
+
+ gilt.
+ 
+\end_layout
+
+\begin_layout Standard
+Mit 
+\begin_inset Formula $ab=N\mathbb{Z}=(\prod_{i\in\mathbb{N}}N_{i})\mathbb{Z}$
+\end_inset
+
+ sehen wir, dass die Primfaktoren 
+\begin_inset Formula $N_{i}$
+\end_inset
+
+ von 
+\begin_inset Formula $N$
+\end_inset
+
+ in 
+\begin_inset Formula $a$
+\end_inset
+
+ und 
+\begin_inset Formula $b$
+\end_inset
+
+ enthalten sein müssen (die Aufteilung ist unbekannt).
+ Allerdings können nicht alle Primfaktoren in 
+\begin_inset Formula $a$
+\end_inset
+
+ oder alle in 
+\begin_inset Formula $b$
+\end_inset
+
+ stecken, da sonst die obigen Äquivalenzausdrücke erfüllt wären.
+ So enthalten sowohl 
+\begin_inset Formula $a$
+\end_inset
+
+ als auch 
+\begin_inset Formula $b$
+\end_inset
+
+ Teiler von 
+\begin_inset Formula $N$
+\end_inset
+
+, welche wir mit 
+\begin_inset Formula $\gcd()$
+\end_inset
+
+ schnell finden können.
+\end_layout
+
+\begin_layout Subsection
+Laufzeit und Resourcen
+\end_layout
+
+\begin_layout Standard
+Neben dem Finden der Ordnung wird nur noch 
+\begin_inset Formula $\gcd()$
+\end_inset
+
+ verwendet.
+ Hierfür existieren aber klassische, schnelle Algorithmen wie z.B.
+ der Euklidische Algorithmus.
+\end_layout
+
+\begin_layout Standard
+Der Faktorisierungsalgorithmus benötigt also 
+\begin_inset Formula $\Theta(L^{3})$
+\end_inset
+
+ Gatter, wobei 
+\begin_inset Formula $L=\left\lceil \mathrm{lb(N)}\right\rceil $
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Section
+Abschließendes Beispiel
+\end_layout
+
+\begin_layout Standard
+Zum Abschluss möchten wir den Algorithmus noch kurz am Beispiel der Zahl
+ 
+\begin_inset Formula $N=15$
+\end_inset
+
+ nachvollziehen:
+\end_layout
+
+\begin_layout Standard
+Als erstes wählen wir eine Zahl 
+\begin_inset Formula $x=7$
+\end_inset
+
+, deren Ordnung in Bezug auf 
+\begin_inset Formula $N$
+\end_inset
+
+ wir nun berechnen wollen.
+ Hierfür initialisieren wir unsere Quantenregister mit 
+\begin_inset Formula $|0\rangle|1\rangle$
+\end_inset
+
+ und wenden auf das erste (Länge 
+\begin_inset Formula $t=11$
+\end_inset
+
+) jeweils das Hadamard-Gatter an:
+\end_layout
+
+\begin_layout Standard
+\noindent
+\align center
+\begin_inset Formula ${\displaystyle \frac{1}{\sqrt{2^{t}}}\sum_{k=0}^{2^{t}-1}|k\rangle|1\rangle}$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Weiterhin wenden wir die 
+\begin_inset Formula $U^{2^{k}}$
+\end_inset
+
+-Gatter auf das zweite Quantenregister an
+\end_layout
+
+\begin_layout Standard
+\noindent
+\align center
+\begin_inset Formula ${\displaystyle \frac{1}{\sqrt{2^{t}}}\sum_{k=0}^{2^{t}-1}|k\rangle|x^{k}\:\mathrm{mod}\; N\rangle=\frac{1}{\sqrt{2^{t}}}}\left[|0\rangle|1\rangle+|1\rangle|7\rangle+|2\rangle|4\rangle+|3\rangle|13\rangle+|4\rangle|1\rangle+|5\rangle|7\rangle+|6\rangle|4\rangle+\ldots\right]$
+\end_inset
+
+ ,
+\end_layout
+
+\begin_layout Standard
+führen die inverse Fouriertransformation auf das erste Quantenregister aus
+ und messen es.
+ Nachdem z.
+ B.
+ 
+\begin_inset Formula $1536/2048=3/4$
+\end_inset
+
+ gemessen wurde, vermuten wir 
+\begin_inset Formula $r=4$
+\end_inset
+
+.
+ Die Ordnung ist sowohl gerade, als auch 
+\begin_inset Formula $x^{r/2}=49\not\equiv-1\:(\mathrm{mod}\:15)$
+\end_inset
+
+; d.
+ h.
+ 
+\begin_inset Formula $\gcd(7^{2}\pm1,\:15)=3,\:4$
+\end_inset
+
+ sind Teiler von 
+\begin_inset Formula $15$
+\end_inset
+
+!
+\end_layout
+
+\begin_layout Standard
+\begin_inset CommandInset bibtex
+LatexCommand bibtex
+btprint "btPrintAll"
+bibfiles "bib"
+options "bibtotoc,plain"
+
+\end_inset
+
+
+\end_layout
+
+\end_body
+\end_document
